@@ -52,7 +52,7 @@ fn vec_to_json_array<T: Display>(vec: Vec<T>) -> String {
     array
 }
 
-fn characterless_player_to_json_obj(player: &CharacterlessPlayer) -> String {
+fn characterless_player_to_phase_json_obj(player: &CharacterlessPlayer) -> String {
     format!(
         r#"{{"points":{},"waits":{},"character_streak":{},"selected_character":{}}}"#,
         player.points,
@@ -62,7 +62,7 @@ fn characterless_player_to_json_obj(player: &CharacterlessPlayer) -> String {
     )
 }
 
-fn boosterless_player_to_json_obj(player: &BoosterlessPlayer) -> String {
+fn boosterless_player_to_phase_json_obj(player: &BoosterlessPlayer) -> String {
     format!(
         r#"{{"points":{},"waits":{},"character":"{}","selected_booster":{}}}"#,
         player.points,
@@ -72,7 +72,7 @@ fn boosterless_player_to_json_obj(player: &BoosterlessPlayer) -> String {
     )
 }
 
-fn moveless_player_to_json_obj(player: &MovelessPlayer) -> String {
+fn moveless_player_to_phase_json_obj(player: &MovelessPlayer) -> String {
     format!(
         r#"{{"points":{},"waits":{},"character":"{}","booster":"{}","move_streak":{},"destroyed_moves":{},"selected_move":{}}}"#,
         player.points,
@@ -85,29 +85,53 @@ fn moveless_player_to_json_obj(player: &MovelessPlayer) -> String {
     )
 }
 
+fn characterless_player_to_question_json_obj(player: &CharacterlessPlayer) -> String {
+    if let Some(ref _selected_character) = &player.selected_character {
+        r#"{"question":null}"#.to_string()
+    } else {
+        format!(r#"{{"question":"CHOOSE_CHARACTER","available_characters":{}}}"#, vec_to_json_array(player.available_characters()))
+    }
+}
+
+fn boosterless_player_to_question_json_obj(player: &BoosterlessPlayer) -> String {
+    if let Some(ref _selected_booster) = &player.selected_booster {
+        r#"{"question":null}"#.to_string()
+    } else {
+        format!(r#"{{"question":"CHOOSE_BOOSTER","available_boosters":{}}}"#, vec_to_json_array(player.available_boosters()))
+    }
+}
+
+fn moveless_player_to_question_json_obj(player: &MovelessPlayer) -> String {
+    if let Some(ref _selected_move) = &player.selected_move {
+        r#"{"question":null}"#.to_string()
+    } else {
+        format!(r#"{{"question":"CHOOSE_MOVE","available_moves":{}}}"#, vec_to_json_array(player.available_moves()))
+    }
+}
+
 pub fn phase_as_json(game: &NZSCTwoPlayerGame) -> String {
     match &game.phase {
         &Phase::CharacterChoosing(ref a, ref b) => {
             format!(
                 r#"{{"phase":"CHARACTER_CHOOSING","a":{},"b":{}}}"#,
-                characterless_player_to_json_obj(a),
-                characterless_player_to_json_obj(b)
+                characterless_player_to_phase_json_obj(a),
+                characterless_player_to_phase_json_obj(b)
             )
         },
 
         &Phase::BoosterChoosing(ref a, ref b) => {
             format!(
                 r#"{{"phase":"BOOSTER_CHOOSING","a":{},"b":{}}}"#,
-                boosterless_player_to_json_obj(a),
-                boosterless_player_to_json_obj(b)
+                boosterless_player_to_phase_json_obj(a),
+                boosterless_player_to_phase_json_obj(b)
             )
         },
 
         &Phase::MoveChoosing(ref a, ref b) => {
             format!(
                 r#"{{"phase":"MOVE_CHOOSING","a":{},"b":{}}}"#,
-                moveless_player_to_json_obj(a),
-                moveless_player_to_json_obj(b)
+                moveless_player_to_phase_json_obj(a),
+                moveless_player_to_phase_json_obj(b)
             )
         },
 
@@ -116,6 +140,41 @@ pub fn phase_as_json(game: &NZSCTwoPlayerGame) -> String {
                 r#"{{"phase":"GAME_OVER","a":{},"b":{}}}"#,
                 a,
                 b
+            )
+        },
+    }
+}
+
+pub fn question_as_json(game: &NZSCTwoPlayerGame) -> String {
+    match &game.phase {
+        &Phase::CharacterChoosing(ref a, ref b) => {
+            format!(
+                r#"{{"phase":"CHARACTER_CHOOSING","a":{},"b":{}}}"#,
+                characterless_player_to_question_json_obj(a),
+                characterless_player_to_question_json_obj(b)
+            )
+        },
+
+        &Phase::BoosterChoosing(ref a, ref b) => {
+            format!(
+                r#"{{"phase":"BOOSTER_CHOOSING","a":{},"b":{}}}"#,
+                boosterless_player_to_question_json_obj(a),
+                boosterless_player_to_question_json_obj(b)
+            )
+        },
+
+        &Phase::MoveChoosing(ref a, ref b) => {
+            format!(
+                r#"{{"phase":"MOVE_CHOOSING","a":{},"b":{}}}"#,
+                moveless_player_to_question_json_obj(a),
+                moveless_player_to_question_json_obj(b)
+            )
+        },
+
+        &Phase::GameOver(ref _a, ref _b) => {
+            format!(
+                r#"{{"phase":"GAME_OVER","a":{0},"b":{0}}}"#,
+                r#"{"question":null}"#
             )
         },
     }
