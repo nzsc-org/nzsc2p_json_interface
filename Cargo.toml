@@ -1,6 +1,6 @@
 [package]
 name = "nzsc2p_json_interface"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Kyle Lin <kylejlin.us@gmail.com>"]
 
 description = "A JSON-string wrapper for nzsc2p."
@@ -8,4 +8,4 @@ repository = "https://github.com/nzsc-org/nzsc2p_json_interface"
 license = "MIT"
 
 [dependencies]
-nzsc2p = "0.2.0"
+nzsc2p = "0.3.0"
